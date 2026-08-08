@@ -1,474 +1,287 @@
-# AI Cart Rescue System
-### Shopping Cart Abandonment Prediction Using XGBoost
+<div align="center">
+
+# 🛒 AI Cart Rescue System
+### Predictive Cart Abandonment Detection & WhatsApp Recovery Alerts
+
+**A Full-Stack AI/ML Web Application that predicts cart abandonment in real time and automatically recovers lost sales through WhatsApp notifications.**
+
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Flask](https://img.shields.io/badge/Flask-Python-000000?style=for-the-badge&logo=flask&logoColor=white)
+![XGBoost](https://img.shields.io/badge/XGBoost-ML%20Model-EB5E28?style=for-the-badge)
+![Twilio](https://img.shields.io/badge/Twilio-WhatsApp%20API-F22F46?style=for-the-badge&logo=twilio&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+
+</div>
 
 ---
 
-## 📌 Project Overview
+## 📖 Overview
 
-One of the biggest challenges in e-commerce is **cart abandonment**. Customers often browse products, add items to their shopping cart, and then leave the website without completing the purchase. This behavior leads to significant revenue loss for online businesses.
+The **AI Cart Rescue System** predicts whether a customer is likely to abandon their shopping cart *before* they leave — using behavioral analytics and a trained machine learning model to estimate abandonment probability in real time.
 
-The objective of this project is to analyze customer clickstream behavior and build a machine learning model capable of predicting whether a shopping session will end in a **purchase** or **cart abandonment**.
+When the predicted risk crosses a set threshold, the system automatically triggers a **WhatsApp reminder** via the Twilio API, nudging the customer back to complete their purchase.
 
-The final solution uses the **XGBoost Classifier** trained on engineered behavioral features extracted from customer session data.
-
----
-
-## 🎯 Problem Statement
-
-A typical customer journey looks like this:
-
-```
-Visit Website
-      │
-      ▼
-Browse Products
-      │
-      ▼
-Add Products to Cart
-      │
-      ▼
-Leave Website
-      │
-      ▼
-Cart Abandonment
-```
-
-The goal of this project is to identify these high-risk sessions **before** the customer leaves, enabling businesses to take corrective actions such as:
-
-- Personalized discounts
-- Coupon recommendations
-- Reminder notifications
-- Retargeting campaigns
+> 💡 Turning silent cart abandonment into an automated, real-time recovery opportunity.
 
 ---
 
-## 📊 Dataset Description
+## ❗ Problem Statement
 
-The project uses an **E-commerce Clickstream Transactions Dataset** containing customer interaction logs.
+E-commerce businesses lose a significant share of revenue to cart abandonment. Most platforms only react *after* a cart is abandoned — often too late to recover the sale — and lack a real-time, automated way to re-engage at-risk customers in the moment.
 
-### Dataset Statistics
+## ✅ Proposed Solution
 
-| Attribute | Value |
+AI Cart Rescue System analyzes live user session behavior (time on site, session count, cart size, etc.), scores each session's abandonment risk using an **XGBoost classifier**, and automatically fires a **WhatsApp recovery message** to high-risk customers before they're lost for good — closing the gap between prediction and action.
+
+---
+
+## ✨ Key Features
+
+| Feature | Description |
 |---|---|
-| Total Sessions | 10,723 |
-| Total Users | 1,000 |
-| Generated Features | 27 |
-| Final Features Used | 6 |
-| Target Variable | `is_abandoned` |
-
-The dataset contains:
-
-- Product views
-- Click events
-- Cart additions
-- Login and logout activities
-- Session timestamps
-- Purchase outcomes
+| 🔮 **Real-Time Prediction** | Predicts purchase completion probability using a trained XGBoost model |
+| 📊 **Risk Classification** | Categorizes sessions as Low / Medium / High risk |
+| 📈 **Interactive Dashboard** | Modern responsive UI with risk gauge and confidence score visualization |
+| 🧠 **ML Engine** | XGBoost classifier with a custom feature engineering pipeline and Joblib model persistence |
+| 📲 **WhatsApp Alerts** | Automated, real-time recovery messages via Twilio WhatsApp API |
+| 🔌 **REST API** | Clean endpoints for prediction, health checks, and model info |
+| ❤️ **Model Monitoring** | Live health and status reporting for the deployed model |
 
 ---
 
-## 🏗️ Project Architecture
+## 🏗️ Architecture
 
 ```
-Raw Clickstream Dataset
-           │
-           ▼
-      Data Cleaning
-           │
-           ▼
-   Session Aggregation
-           │
-           ▼
-   Feature Engineering
-           │
-           ▼
-    Feature Selection
-           │
-           ▼
-     Train/Test Split
-           │
-           ▼
-    SMOTE Balancing
-           │
-           ▼
-    XGBoost Training
-           │
-           ▼
- Hyperparameter Tuning
-           │
-           ▼
-     Model Evaluation
-           │
-           ▼
-      Trained Model
-```
-
----
-
-## 🧹 Data Preprocessing
-
-The original dataset consisted of raw user interaction events. These events were first cleaned and transformed into session-level information.
-
-**Operations performed:**
-
-- Removed duplicate records
-- Processed timestamp information
-- Aggregated events into user sessions
-- Generated behavioral metrics
-- Prepared data for machine learning
-
-Instead of training directly on raw clickstream events, meaningful behavioral features were created to better represent customer activity.
-
----
-
-## ⚙️ Feature Engineering
-
-Feature engineering was the most important part of this project.
-
-A total of **27 behavioral features** were generated from customer activity logs.
-
-**Examples include:**
-
-- `add_to_cart_count`
-- `view_count`
-- `product_view_count`
-- `session_duration_sec`
-- `click_count`
-- `user_total_sessions`
-- `user_total_carts`
-- `avg_products_per_user`
-- `session_activity_score`
-- `average_session_duration_per_user`
-
-### Behavioral Ratios
-
-To better capture customer engagement, several ratio-based features were created.
-
-**Click-to-View Ratio**
-
-```
-ClickToViewRatio = ClickCount / ViewCount
-```
-
-**Add-to-Cart Ratio**
-
-```
-AddToCartRatio = AddToCartCount / ViewCount
-```
-
-**Product View Ratio**
-
-```
-ProductViewRatio = ProductViewCount / TotalEvents
-```
-
-These features help describe how actively a customer interacts with products during a session.
-
----
-
-## 🎯 Final Feature Selection
-
-After multiple experiments, feature importance analysis, and model evaluation, **six features** were selected for the final model:
-
-1. `hour_of_day`
-2. `user_total_sessions`
-3. `avg_products_per_user`
-4. `user_total_carts`
-5. `average_session_duration_per_user`
-6. `is_weekend`
-
-**Feature reduction process:**
-
-```
-27 Features
-      │
-      ▼
-Correlation Analysis
-      │
-      ▼
-Importance Ranking
-      │
-      ▼
-Feature Selection
-      │
-      ▼
-Top 6 Features
-```
-
----
-
-## 🌳 Why XGBoost?
-
-Several machine learning algorithms were considered, including Logistic Regression and Decision Trees.
-
-**XGBoost was selected because:**
-
-- Excellent performance on tabular data
-- Handles nonlinear patterns effectively
-- Built-in regularization reduces overfitting
-- Supports feature importance analysis
-- Highly optimized and scalable
-
-### How XGBoost Works Internally
-
-XGBoost is based on the concept of **Gradient Boosting**.
-
-Instead of building a single decision tree, XGBoost builds many trees sequentially. Each new tree attempts to correct the mistakes made by previous trees.
-
-**Training flow:**
-
-```
-Training Data
-      │
-      ▼
-   Tree 1
-      │
-      ▼
-Prediction Errors
-      │
-      ▼
-   Tree 2
-      │
-      ▼
-Remaining Errors
-      │
-      ▼
-   Tree 3
-      │
-      ▼
-    ...
-      │
-      ▼
-  Tree 800
-      │
-      ▼
-Final Prediction
-```
-
-In this project: **n_estimators = 800**, meaning the final model contains 800 boosted decision trees.
-
-### Gradient Boosting Formula
-
-The final prediction generated by XGBoost is:
-
-```
-ŷ = Σ (k=1 to K) fk(x)
-```
-
-Where:
-- `ŷ` = Final prediction
-- `K` = Number of trees
-- `fk(x)` = Prediction from individual tree
-
-For this project: **K = 800**
-
-### XGBoost Objective Function
-
-The objective function optimized during training is:
-
-```
-Obj = Loss + Regularization
-```
-
-Expanded form:
-
-```
-Obj = Σ l(yi, ŷi) + Σ Ω(fk)
-```
-
-Where:
-- `l` = prediction error
-- `Ω` = regularization term
-- `fk` = decision trees
-
-The regularization component helps reduce overfitting and improves generalization.
-
-### Example Decision Tree
-
-```
-                 hour_of_day < 18?
-                       /      \
-                     Yes      No
-                     /         \
-              Purchase   user_total_sessions > 75?
-                               /        \
-                             Yes        No
-                             /           \
-                        Abandoned    Purchase
-```
-
-Each tree contributes a small score, and all scores are combined to generate the final prediction.
-
----
-
-## ⚖️ Handling Class Imbalance Using SMOTE
-
-The dataset contained significantly more abandoned sessions than completed purchases.
-
-To address this issue, **SMOTE** (Synthetic Minority Oversampling Technique) was applied.
-
-### SMOTE Formula
-
-```
-Xnew = Xi + λ(Xnn − Xi)
-```
-
-Where:
-- `Xi` = Minority class sample
-- `Xnn` = Nearest neighbor
-- `λ` = Random value between 0 and 1
-
-### SMOTE Workflow
-
-```
-Imbalanced Dataset
+Frontend (React)
         │
         ▼
-       SMOTE
+Backend API (Flask)
         │
         ▼
-Balanced Dataset
+Feature Validation
         │
         ▼
-Model Training
+XGBoost Model
+        │
+        ▼
+Prediction Engine
+        │
+        ▼
+Risk Analysis
+        │
+        ├──────────────┬──────────────┐
+        ▼              ▼
+Dashboard UI    WhatsApp Notification
 ```
-
-This helps the model learn patterns from both classes more effectively.
 
 ---
 
-## 🏋️ Model Training Process
+## 🛠️ Technology Stack
 
-### Train-Test Split
-
-```
-Training Data = 80%
-Testing Data  = 20%
-```
-
-### Hyperparameter Optimization
-
-**Randomized Search Cross Validation** was used to find the best XGBoost configuration.
-
-**Final parameters:**
-
-```python
-XGBClassifier(
-    n_estimators=800,
-    max_depth=8,
-    learning_rate=0.1,
-    subsample=0.7,
-    colsample_bytree=0.7,
-    gamma=0
-)
-```
-
-### Probability Prediction
-
-After all trees generate their scores, XGBoost converts the output into a probability using the **Sigmoid Function**.
-
-```
-P(y=1) = 1 / (1 + e^(−z))
-```
-
-Where:
-- `z` = Combined tree score
-- `P(y=1)` = Probability of cart abandonment
-
-**Example:**
-
-```
-P(y=1) = 0.78
-```
-
-Meaning: **78% probability** that the customer will abandon the cart.
-
----
-
-## 📈 Model Evaluation
-
-The primary evaluation metric used in this project was **ROC-AUC**.
-
-**True Positive Rate**
-```
-TPR = TP / (TP + FN)
-```
-
-**False Positive Rate**
-```
-FPR = FP / (FP + TN)
-```
-
-The ROC Curve plots **TPR vs FPR**. The Area Under the Curve (AUC) measures how well the model distinguishes between abandoned and purchased sessions.
-
-### Final Result
-
-| Metric | Value |
+| Layer | Technologies |
 |---|---|
-| ROC-AUC Score | 0.5575 |
-| Target ROC-AUC | 0.60 |
+| **Frontend** | React.js, Vite, Axios, Tailwind CSS |
+| **Backend** | Python, Flask, Flask-CORS |
+| **Data Processing** | Pandas, NumPy |
+| **Machine Learning** | XGBoost, Scikit-learn, Feature Engineering, Joblib |
+| **Notifications** | Twilio WhatsApp API |
 
 ---
 
-## 🔍 Performance Analysis
+## 📊 Dataset & Features
 
-The model successfully learned customer behavioral patterns and identified abandonment trends.
+The model is trained on behavioral session data using the following input features:
 
-However, analysis showed that many purchased and abandoned sessions exhibited similar behavioral characteristics. This limited the amount of predictive signal available to the model.
+| # | Feature | Description |
+|---|---|---|
+| 1 | `hour_of_day` | Hour at which the session occurs |
+| 2 | `user_total_sessions` | Total number of sessions by the user |
+| 3 | `avg_products_per_user` | Average products viewed/added per user |
+| 4 | `user_total_carts` | Total carts created by the user |
+| 5 | `avg_session_duration` | Average session duration |
+| 6 | `is_weekend` | Weekend indicator (binary) |
 
-**Additional features that could further improve prediction performance:**
+### Prediction Output
 
-- Product category
-- Product price
-- Marketing source
-- Customer demographics
-- Customer lifetime value
-
----
-
-## 💾 Model Export
-
-The final trained model was saved using **Joblib**:
-
-```python
-joblib.dump(
-    final_model,
-    "cart_rescue_final_optimized.pkl"
-)
+```json
+{
+  "prediction": 1,
+  "probability": 0.87
+}
 ```
 
-The exported model can later be integrated into an API and dashboard for real-time predictions.
-
----
-
-## 🛠️ Technologies Used
-
-| Category | Technology |
+| Value | Meaning |
 |---|---|
-| Programming Language | Python |
-| Data Processing | Pandas, NumPy |
-| Machine Learning | XGBoost |
-| Class Balancing | SMOTE |
-| Model Evaluation | Scikit-Learn |
-| Visualization | Matplotlib, Seaborn |
-| Model Storage | Joblib |
-| Development Environment | Google Colab / Jupyter Notebook |
+| `0` | Purchase Completed |
+| `1` | Cart Abandoned |
 
 ---
 
-## ✅ Conclusion
+## 🤖 Machine Learning Workflow
 
-In this project, customer clickstream data was transformed into meaningful behavioral features and used to train an XGBoost model for shopping cart abandonment prediction.
+1. **Data Collection** — Capture live session behavior signals
+2. **Feature Engineering** — Transform raw session data into model-ready features
+3. **Model Training** — XGBoost Classifier trained on historical abandonment data
+4. **Model Persistence** — Trained model serialized with Joblib for fast inference
+5. **Real-Time Inference** — `/predict` endpoint scores incoming sessions instantly
+6. **Risk Bucketing** — Probability score mapped to Low / Medium / High risk tiers
 
-**The workflow included:**
+---
 
-1. Data preprocessing
-2. Session aggregation
-3. Feature engineering
-4. Feature selection
-5. SMOTE balancing
-6. XGBoost training
-7. Hyperparameter optimization
-8. ROC-AUC evaluation
+## 📲 WhatsApp Integration
 
-The final model achieved a **ROC-AUC score of 0.5575** and provides a strong foundation for building intelligent cart recovery systems in e-commerce platforms.
+When a session's abandonment probability crosses the configured threshold, the backend automatically calls the **Twilio WhatsApp API** to send a real-time recovery message to the customer — no manual intervention required.
+
+- ✅ Twilio WhatsApp Sandbox supported for development/testing
+- ✅ Configurable risk threshold for triggering alerts
+- ✅ Real-time, automated dispatch on high-risk prediction
+
+---
+
+## ⚙️ Installation Guide
+
+### Prerequisites
+- Node.js (v18+)
+- Python (v3.9+)
+- A Twilio account with WhatsApp Sandbox enabled
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Backend Setup
+
+```bash
+cd backend
+pip install -r requirements.txt
+python app.py
+```
+
+### Environment Variables
+
+Create a `.env` file inside `backend/`:
+
+```env
+TWILIO_ACCOUNT_SID=your_account_sid
+TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_WHATSAPP_FROM=your_twilio_whatsapp_number
+TWILIO_WHATSAPP_TO=recipient_whatsapp_number
+```
+
+---
+
+## 📡 API Documentation
+
+### `POST /predict`
+Predicts cart abandonment probability for a given session.
+
+**Request Body:**
+```json
+{
+  "hour_of_day": 21,
+  "user_total_sessions": 4,
+  "avg_products_per_user": 3.2,
+  "user_total_carts": 2,
+  "avg_session_duration": 145,
+  "is_weekend": 1
+}
+```
+
+**Response:**
+```json
+{
+  "prediction": 1,
+  "probability": 0.87
+}
+```
+
+### `GET /health`
+Returns backend and model service health status.
+
+### `GET /model-info`
+Returns metadata about the currently loaded ML model.
+
+---
+
+## 📁 Folder Structure
+
+```
+ai-cart-rescue/
+│
+├── frontend/
+│   ├── src/
+│   ├── components/
+│   ├── pages/
+│   ├── services/
+│   └── utils/
+│
+├── backend/
+│   ├── model/
+│   ├── routes/
+│   ├── services/
+│   ├── utils/
+│   ├── app.py
+│   └── .env
+│
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## 🖼️ Screenshots
+
+> _Add screenshots below to showcase the dashboard, risk gauge, and prediction results._
+
+| Dashboard | Risk Gauge | Prediction Result |
+|---|---|---|
+| _placeholder_ | _placeholder_ | _placeholder_ |
+
+---
+
+## 🚀 Future Scope
+
+- 📧 Email notification channel
+- 📱 SMS alerts
+- 🔐 User authentication
+- ☁️ Cloud deployment (AWS/Render/Vercel)
+- 📍 Live customer tracking
+- 🎯 Recommendation engine integration
+- 🔗 Multi-channel marketing integration
+
+---
+
+## 🎓 Learning Outcomes
+
+Building this project involved hands-on experience across the full stack:
+
+- Designing and training a classification model (XGBoost) with a real feature engineering pipeline
+- Building a production-style Flask REST API with model persistence via Joblib
+- Integrating a third-party notification API (Twilio WhatsApp) into an automated backend workflow
+- Building a responsive React + Tailwind dashboard consuming a live prediction API
+- Structuring a full-stack project with clear separation between frontend, backend, and ML components
+
+---
+
+## 👤 Contributors
+
+**Nemala Dhana Babu**
+[LinkedIn](https://www.linkedin.com/in/nemala-dhana-babu-03580a331) • [GitHub](https://github.com/ndb1234-1234)
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**⭐ If you found this project useful, consider giving it a star!**
+
+</div>
